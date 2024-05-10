@@ -17,21 +17,6 @@ export class Circulation {
     timestamp!: Date
 
     @BigDecimalColumn_({nullable: false})
-    reward!: BigDecimal
-
-    @BigDecimalColumn_({nullable: false})
-    phalaChainBridge!: BigDecimal
-
-    @BigDecimalColumn_({nullable: false})
-    khalaChainBridge!: BigDecimal
-
-    @BigDecimalColumn_({nullable: false})
-    sygmaBridge!: BigDecimal
-
-    @BigDecimalColumn_({nullable: false})
-    portalBridge!: BigDecimal
-
-    @BigDecimalColumn_({nullable: false})
     totalSupply!: BigDecimal
 
     @BigDecimalColumn_({nullable: false})

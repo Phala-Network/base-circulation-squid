@@ -9,12 +9,12 @@ import {
 import type {Store} from '@subsquid/typeorm-store'
 import {assertNotNull} from '@subsquid/util-internal'
 
-export const CONTRACT_ADDRESS = '0x6c5bA91642F10282b576d91922Ae6448C9d52f4E'
-export const CONTRACT_DEPLOYED_AT = 9975568
+export const CONTRACT_ADDRESS = '0x336C9297AFB7798c292E9f80d8e566b947f291f0'
+export const CONTRACT_DEPLOYED_AT = 12743284
 
 export const processor = new EvmBatchProcessor()
   .includeAllBlocks()
-  .setGateway({url: 'https://v2.archive.subsquid.io/network/ethereum-mainnet'})
+  .setGateway({url: 'https://v2.archive.subsquid.io/network/base-mainnet'})
   .setRpcEndpoint({
     // Set the URL via .env for local runs or via secrets when deploying to Subsquid Cloud
     // https://docs.subsquid.io/deploy-squid/env-variables/
