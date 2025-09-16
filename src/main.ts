@@ -19,6 +19,11 @@ const KHALA_CHAIN_BRIDGE_ADDRESS = '0xeec0fb4913119567cdfc0c5fc2bf8f9f9b226c2d'
 const SYGMA_BRIDGE_ADDRESS = '0xC832588193cd5ED2185daDA4A531e0B26eC5B830'
 const PORTAL_BRIDGE_ADDRESS = '0x3ee18B2214AFF97000D974cf647E7C347E8fa585'
 
+// Environment variable for latest data update interval
+const LATEST_DATA_UPDATE_INTERVAL = Number.parseInt(
+  process.env.LATEST_DATA_UPDATE_INTERVAL || '300',
+)
+
 const normalizeTimestamp = (timestamp?: number): Date => {
   assert(timestamp)
   const date = new Date(timestamp)
@@ -66,6 +71,9 @@ processor.run(new TypeormDatabase(), async (ctx) => {
     })
   ).at(0)
   const snapshots: Snapshot[] = []
+  const circulation = await ctx.store.get(Circulation, '0')
+  let lastLatestDataUpdateTimestamp = circulation?.timestamp.getTime() ?? 0
+
   for (const block of ctx.blocks) {
     const timestamp = normalizeTimestamp(block.header.timestamp)
     if (
@@ -106,13 +114,24 @@ processor.run(new TypeormDatabase(), async (ctx) => {
   if (ctx.isHead) {
     const block = ctx.blocks.at(-1)
     assert(block?.header.timestamp)
-    const data = await fetchCirculation(ctx, block.header)
-    const circulation = new Circulation({
-      id: '0',
-      blockHeight: block.header.height,
-      timestamp: new Date(block.header.timestamp),
-      ...data,
-    })
-    await ctx.store.save(circulation)
+
+    // Check if enough blocks have passed since last update
+    if (
+      block.header.timestamp - lastLatestDataUpdateTimestamp >=
+      LATEST_DATA_UPDATE_INTERVAL * 1000
+    ) {
+      ctx.log.info(
+        `Updating latest data at block ${block.header.height} (interval: ${LATEST_DATA_UPDATE_INTERVAL} blocks)`,
+      )
+      const data = await fetchCirculation(ctx, block.header)
+      const circulation = new Circulation({
+        id: '0',
+        blockHeight: block.header.height,
+        timestamp: new Date(block.header.timestamp),
+        ...data,
+      })
+      await ctx.store.save(circulation)
+      lastLatestDataUpdateTimestamp = block.header.timestamp
+    }
   }
 })
